@@ -1,7 +1,9 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using FolderLockApp.Core.Interfaces;
 using FolderLockApp.Core.Services;
 using FolderLockApp.Core.Data;
@@ -22,8 +24,16 @@ public partial class App : Application
         _host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
+                // Configure database path
+                var appDataPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                    "FolderLockApp");
+                Directory.CreateDirectory(appDataPath);
+                var dbPath = Path.Combine(appDataPath, "folderlock.db");
+
                 // Register Core services
-                services.AddDbContext<FolderLockDbContext>();
+                services.AddDbContext<FolderLockDbContext>(options =>
+                    options.UseSqlite($"Data Source={dbPath}"));
                 services.AddSingleton<IFolderRegistry, FolderRegistry>();
                 services.AddSingleton<IEncryptionEngine, EncryptionEngine>();
 
@@ -41,16 +51,28 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
-        await _host.StartAsync();
+        try
+        {
+            await _host.StartAsync();
 
-        // Initialize database
-        var folderRegistry = _host.Services.GetRequiredService<IFolderRegistry>();
-        await folderRegistry.InitializeDatabaseAsync();
+            // Initialize database by ensuring DbContext is created
+            using (var scope = _host.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<FolderLockDbContext>();
+                await dbContext.Database.EnsureCreatedAsync();
+            }
 
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
 
-        base.OnStartup(e);
+            base.OnStartup(e);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Application startup failed:\n\n{ex.Message}\n\nStack Trace:\n{ex.StackTrace}", 
+                "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
+        }
     }
 
     protected override async void OnExit(ExitEventArgs e)
