@@ -3,6 +3,7 @@ using FolderLockApp.Core.Models;
 using FolderLockApp.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security;
+using System.Text.Json;
 
 namespace FolderLockApp.Service;
 
@@ -17,6 +18,7 @@ public class EncryptionBackgroundService : BackgroundService
     private List<LockedFolderEntry> _lockedFolders = new();
     private readonly Dictionary<string, FileSystemWatcher> _folderWatchers = new();
     private readonly object _lockObject = new();
+    private NamedPipeServer? _pipeServer;
 
     public EncryptionBackgroundService(
         ILogger<EncryptionBackgroundService> logger,
@@ -38,6 +40,15 @@ public class EncryptionBackgroundService : BackgroundService
 
         try
         {
+            // Start Named Pipe server for IPC
+            using var scope = _serviceProvider.CreateScope();
+            var pipeLogger = scope.ServiceProvider.GetRequiredService<ILogger<NamedPipeServer>>();
+            _pipeServer = new NamedPipeServer(pipeLogger);
+            _pipeServer.OnMessageReceived += HandleIpcRequestAsync;
+            _pipeServer.Start();
+            
+            _logger.LogInformation("Named Pipe server started for IPC communication");
+
             // Load all locked folders from the registry
             await LoadLockedFoldersAsync();
             
@@ -96,6 +107,14 @@ public class EncryptionBackgroundService : BackgroundService
 
         try
         {
+            // Stop Named Pipe server
+            if (_pipeServer != null)
+            {
+                await _pipeServer.StopAsync();
+                _pipeServer.Dispose();
+                _logger.LogInformation("Named Pipe server stopped");
+            }
+
             // Stop all folder watchers
             StopMonitoringAllFolders();
 
@@ -457,4 +476,176 @@ public class EncryptionBackgroundService : BackgroundService
             return (false, $"Error: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Handles incoming IPC requests from GUI clients.
+    /// Implements Requirements: 1.3, 2.2, 7.1, 7.5
+    /// </summary>
+    private async Task<string> HandleIpcRequestAsync(string requestJson)
+    {
+        try
+        {
+            _logger.LogDebug("Processing IPC request: {Request}", requestJson);
+
+            var request = JsonSerializer.Deserialize<IpcRequest>(requestJson);
+            
+            if (request == null)
+            {
+                return JsonSerializer.Serialize(new ServiceResponse
+                {
+                    Success = false,
+                    Message = "Invalid request format"
+                });
+            }
+
+            return request.Action switch
+            {
+                "Ping" => JsonSerializer.Serialize(new ServiceResponse { Success = true, Message = "Pong" }),
+                "LockFolder" => await HandleLockFolderRequestAsync(request),
+                "UnlockFolder" => await HandleUnlockFolderRequestAsync(request),
+                "RemoveFolder" => await HandleRemoveFolderRequestAsync(request),
+                "GetLockedFolders" => await HandleGetLockedFoldersRequestAsync(),
+                _ => JsonSerializer.Serialize(new ServiceResponse
+                {
+                    Success = false,
+                    Message = $"Unknown action: {request.Action}"
+                })
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling IPC request");
+            return JsonSerializer.Serialize(new ServiceResponse
+            {
+                Success = false,
+                Message = $"Error: {ex.Message}"
+            });
+        }
+    }
+
+    private async Task<string> HandleLockFolderRequestAsync(IpcRequest request)
+    {
+        if (string.IsNullOrEmpty(request.FolderPath) || string.IsNullOrEmpty(request.Password))
+        {
+            return JsonSerializer.Serialize(new ServiceResponse
+            {
+                Success = false,
+                Message = "FolderPath and Password are required"
+            });
+        }
+
+        var securePassword = ConvertToSecureString(request.Password);
+        var (success, message) = await LockFolderAsync(request.FolderPath, securePassword);
+
+        return JsonSerializer.Serialize(new ServiceResponse
+        {
+            Success = success,
+            Message = message
+        });
+    }
+
+    private async Task<string> HandleUnlockFolderRequestAsync(IpcRequest request)
+    {
+        if (string.IsNullOrEmpty(request.FolderPath) || string.IsNullOrEmpty(request.Password))
+        {
+            return JsonSerializer.Serialize(new ServiceResponse
+            {
+                Success = false,
+                Message = "FolderPath and Password are required"
+            });
+        }
+
+        var securePassword = ConvertToSecureString(request.Password);
+        var (success, message) = await UnlockFolderAsync(request.FolderPath, securePassword);
+
+        return JsonSerializer.Serialize(new ServiceResponse
+        {
+            Success = success,
+            Message = message
+        });
+    }
+
+    private async Task<string> HandleRemoveFolderRequestAsync(IpcRequest request)
+    {
+        if (string.IsNullOrEmpty(request.FolderPath) || string.IsNullOrEmpty(request.Password))
+        {
+            return JsonSerializer.Serialize(new ServiceResponse
+            {
+                Success = false,
+                Message = "FolderPath and Password are required"
+            });
+        }
+
+        try
+        {
+            var securePassword = ConvertToSecureString(request.Password);
+            
+            // Unlock the folder first
+            var (unlockSuccess, unlockMessage) = await UnlockFolderAsync(request.FolderPath, securePassword);
+            
+            if (!unlockSuccess)
+            {
+                return JsonSerializer.Serialize(new ServiceResponse
+                {
+                    Success = false,
+                    Message = $"Failed to unlock folder: {unlockMessage}"
+                });
+            }
+
+            // Remove from registry
+            using var scope = _serviceProvider.CreateScope();
+            var folderRegistry = scope.ServiceProvider.GetRequiredService<IFolderRegistry>();
+            await folderRegistry.RemoveLockedFolderAsync(request.FolderPath);
+
+            // Reload folders
+            await LoadLockedFoldersAsync();
+
+            return JsonSerializer.Serialize(new ServiceResponse
+            {
+                Success = true,
+                Message = "Folder removed from management successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing folder: {FolderPath}", request.FolderPath);
+            return JsonSerializer.Serialize(new ServiceResponse
+            {
+                Success = false,
+                Message = $"Error: {ex.Message}"
+            });
+        }
+    }
+
+    private async Task<string> HandleGetLockedFoldersRequestAsync()
+    {
+        var folders = GetLockedFolders().Select(f => new LockedFolderInfo
+        {
+            FolderPath = f.FolderPath,
+            IsLocked = f.IsLocked,
+            LockedDate = f.LockedDate,
+            LastAccessed = f.LastAccessed
+        }).ToList();
+
+        return JsonSerializer.Serialize(folders);
+    }
+
+    private SecureString ConvertToSecureString(string password)
+    {
+        var securePassword = new SecureString();
+        foreach (char c in password)
+        {
+            securePassword.AppendChar(c);
+        }
+        securePassword.MakeReadOnly();
+        return securePassword;
+    }
+
+    private class IpcRequest
+    {
+        public string Action { get; set; } = string.Empty;
+        public string FolderPath { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
 }
+

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using FolderLockApp.Core.Interfaces;
 using FolderLockApp.Core.Services;
 using FolderLockApp.Core.Data;
@@ -25,6 +26,9 @@ public partial class App : Application
                 services.AddDbContext<FolderLockDbContext>();
                 services.AddSingleton<IFolderRegistry, FolderRegistry>();
                 services.AddSingleton<IEncryptionEngine, EncryptionEngine>();
+
+                // Register IPC service proxy for communication with background service
+                services.AddSingleton<IEncryptionServiceContract, EncryptionServiceProxy>();
 
                 // Register ViewModels
                 services.AddTransient<MainWindowViewModel>();
