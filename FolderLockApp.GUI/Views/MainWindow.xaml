@@ -1,0 +1,108 @@
+﻿<Window x:Class="FolderLockApp.GUI.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FolderLockApp.GUI.Views"
+        mc:Ignorable="d"
+        Title="Folder Lock Application" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title and Toolbar -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" 
+                       Text="Locked Folders" 
+                       FontSize="20" 
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+
+            <StackPanel Grid.Column="1" 
+                        Orientation="Horizontal">
+                <Button Content="Lock Folder" 
+                        Width="100" 
+                        Height="32"
+                        Margin="0,0,10,0"
+                        Command="{Binding LockFolderCommand}"/>
+                <Button Content="Unlock" 
+                        Width="100" 
+                        Height="32"
+                        Margin="0,0,10,0"
+                        Command="{Binding UnlockFolderCommand}"/>
+                <Button Content="Remove" 
+                        Width="100" 
+                        Height="32"
+                        Margin="0,0,10,0"
+                        Command="{Binding RemoveFolderCommand}"/>
+                <Button Content="Refresh" 
+                        Width="100" 
+                        Height="32"
+                        Command="{Binding RefreshCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Folder List -->
+        <DataGrid Grid.Row="1" 
+                  ItemsSource="{Binding LockedFolders}"
+                  SelectedItem="{Binding SelectedFolder}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  GridLinesVisibility="Horizontal"
+                  AlternatingRowBackground="#F5F5F5"
+                  Margin="0,0,0,10">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Folder Path" 
+                                    Binding="{Binding FolderPath}" 
+                                    Width="*"
+                                    MinWidth="300"/>
+                <DataGridTextColumn Header="Status" 
+                                    Binding="{Binding IsLocked, Converter={StaticResource BoolToStatusConverter}}" 
+                                    Width="100"/>
+                <DataGridTextColumn Header="Locked Date" 
+                                    Binding="{Binding LockedDate, StringFormat='yyyy-MM-dd HH:mm'}" 
+                                    Width="150"/>
+                <DataGridTextColumn Header="Last Accessed" 
+                                    Binding="{Binding LastAccessed, StringFormat='yyyy-MM-dd HH:mm'}" 
+                                    Width="150"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Progress Bar -->
+        <ProgressBar Grid.Row="2" 
+                     Height="20" 
+                     Minimum="0" 
+                     Maximum="100"
+                     Value="{Binding ProgressValue}"
+                     Visibility="{Binding IsOperationInProgress, Converter={StaticResource BoolToVisibilityConverter}}"
+                     Margin="0,0,0,10"/>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="3" Height="25">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusMessage}"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+
+    <Window.Resources>
+        <!-- Bool to Visibility Converter -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
+        <!-- Bool to Status Converter -->
+        <local:BoolToStatusConverter x:Key="BoolToStatusConverter"/>
+    </Window.Resources>
+</Window>
