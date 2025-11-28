@@ -94,5 +94,16 @@ $RECYCLE.BIN/
 # Mac
 .DS_Store
 
-# Kiro specs folder (optional - remove this line if you want to commit specs)
-.kiro/
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Backup files
+*.bak
+*.backup
+
+# Test results
+TestResults/
+*.trx
+*.coverage
