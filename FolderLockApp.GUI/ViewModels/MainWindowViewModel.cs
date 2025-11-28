@@ -185,28 +185,50 @@ public class MainWindowViewModel : ViewModelBase
 
         try
         {
-            // Show password dialog
-            var passwordDialog = new Views.PasswordDialog
+            // Show password dialog with retry logic
+            Views.PasswordDialog? passwordDialog = null;
+            bool isPasswordCorrect = false;
+            int attempts = 0;
+            const int maxAttempts = 3;
+
+            while (!isPasswordCorrect && attempts < maxAttempts)
             {
-                Message = $"Enter password to unlock:\n{SelectedFolder.FolderPath}",
-                RequireConfirmation = false,
-                Owner = Application.Current.MainWindow
-            };
+                passwordDialog = new Views.PasswordDialog
+                {
+                    Message = attempts == 0 
+                        ? $"Enter password to unlock:\n{SelectedFolder.FolderPath}"
+                        : $"Enter password to unlock:\n{SelectedFolder.FolderPath}\n\nAttempt {attempts + 1} of {maxAttempts}",
+                    RequireConfirmation = false,
+                    Owner = Application.Current.MainWindow
+                };
 
-            if (passwordDialog.ShowDialog() != true || passwordDialog.Password == null)
-                return;
+                if (passwordDialog.ShowDialog() != true || passwordDialog.Password == null)
+                    return;
 
-            // Verify password
-            bool isPasswordCorrect = _encryptionEngine.VerifyPassword(
-                passwordDialog.Password,
-                SelectedFolder.PasswordHash,
-                SelectedFolder.Salt);
+                // Verify password
+                isPasswordCorrect = _encryptionEngine.VerifyPassword(
+                    passwordDialog.Password,
+                    SelectedFolder.PasswordHash,
+                    SelectedFolder.Salt);
 
-            if (!isPasswordCorrect)
-            {
-                MessageBox.Show("Incorrect password.", "Authentication Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                if (!isPasswordCorrect)
+                {
+                    attempts++;
+                    if (attempts < maxAttempts)
+                    {
+                        passwordDialog.ShowError("Incorrect password. Please try again.");
+                        passwordDialog.ShowDialog();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Maximum password attempts reached.", "Authentication Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
             }
+
+            if (!isPasswordCorrect || passwordDialog?.Password == null)
+                return;
 
             IsOperationInProgress = true;
             ProgressValue = 0;
@@ -264,28 +286,50 @@ public class MainWindowViewModel : ViewModelBase
             if (confirmResult != MessageBoxResult.Yes)
                 return;
 
-            // Show password dialog for confirmation
-            var passwordDialog = new Views.PasswordDialog
+            // Show password dialog for confirmation with retry logic
+            Views.PasswordDialog? passwordDialog = null;
+            bool isPasswordCorrect = false;
+            int attempts = 0;
+            const int maxAttempts = 3;
+
+            while (!isPasswordCorrect && attempts < maxAttempts)
             {
-                Message = $"Enter password to confirm removal:\n{SelectedFolder.FolderPath}",
-                RequireConfirmation = false,
-                Owner = Application.Current.MainWindow
-            };
+                passwordDialog = new Views.PasswordDialog
+                {
+                    Message = attempts == 0
+                        ? $"Enter password to confirm removal:\n{SelectedFolder.FolderPath}"
+                        : $"Enter password to confirm removal:\n{SelectedFolder.FolderPath}\n\nAttempt {attempts + 1} of {maxAttempts}",
+                    RequireConfirmation = false,
+                    Owner = Application.Current.MainWindow
+                };
 
-            if (passwordDialog.ShowDialog() != true || passwordDialog.Password == null)
-                return;
+                if (passwordDialog.ShowDialog() != true || passwordDialog.Password == null)
+                    return;
 
-            // Verify password
-            bool isPasswordCorrect = _encryptionEngine.VerifyPassword(
-                passwordDialog.Password,
-                SelectedFolder.PasswordHash,
-                SelectedFolder.Salt);
+                // Verify password
+                isPasswordCorrect = _encryptionEngine.VerifyPassword(
+                    passwordDialog.Password,
+                    SelectedFolder.PasswordHash,
+                    SelectedFolder.Salt);
 
-            if (!isPasswordCorrect)
-            {
-                MessageBox.Show("Incorrect password.", "Authentication Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                if (!isPasswordCorrect)
+                {
+                    attempts++;
+                    if (attempts < maxAttempts)
+                    {
+                        passwordDialog.ShowError("Incorrect password. Please try again.");
+                        passwordDialog.ShowDialog();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Maximum password attempts reached.", "Authentication Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
             }
+
+            if (!isPasswordCorrect || passwordDialog?.Password == null)
+                return;
 
             IsOperationInProgress = true;
             ProgressValue = 0;
