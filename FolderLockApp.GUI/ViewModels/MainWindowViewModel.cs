@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Security;
 using System.Windows;
 using System.Windows.Input;
@@ -230,6 +231,23 @@ public class MainWindowViewModel : ViewModelBase
             if (!isPasswordCorrect || passwordDialog?.Password == null)
                 return;
 
+            // Check if folder still exists
+            if (!Directory.Exists(SelectedFolder.FolderPath))
+            {
+                var removeResult = MessageBox.Show(
+                    $"The folder no longer exists:\n{SelectedFolder.FolderPath}\n\nWould you like to remove it from the list?",
+                    "Folder Not Found",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (removeResult == MessageBoxResult.Yes)
+                {
+                    await _folderRegistry.RemoveLockedFolderAsync(SelectedFolder.FolderPath);
+                    await LoadLockedFoldersAsync();
+                }
+                return;
+            }
+
             IsOperationInProgress = true;
             ProgressValue = 0;
             StatusMessage = "Decrypting folder...";
@@ -244,13 +262,14 @@ public class MainWindowViewModel : ViewModelBase
 
             if (!result.Success)
             {
-                MessageBox.Show($"Decryption failed: {result.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Decryption failed: {result.ErrorMessage}\n\nPlease check:\n- The folder still exists\n- Files have .locked extension\n- You're using the correct password", 
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 StatusMessage = "Decryption failed";
                 return;
             }
 
-            // Update last accessed time
-            await _folderRegistry.UpdateLastAccessAsync(SelectedFolder.FolderPath);
+            // Remove from registry after successful decryption
+            await _folderRegistry.RemoveLockedFolderAsync(SelectedFolder.FolderPath);
 
             StatusMessage = $"Successfully unlocked folder: {SelectedFolder.FolderPath}";
             MessageBox.Show($"Folder unlocked successfully!\nFiles processed: {result.FilesProcessed}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);

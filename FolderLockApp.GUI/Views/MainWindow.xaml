@@ -7,6 +7,15 @@
         mc:Ignorable="d"
         Title="Folder Lock Application" Height="600" Width="900"
         WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <!-- Bool to Visibility Converter -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
+        <!-- Bool to Status Converter -->
+        <local:BoolToStatusConverter x:Key="BoolToStatusConverter"/>
+    </Window.Resources>
+    
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -97,12 +106,4 @@
             </StatusBarItem>
         </StatusBar>
     </Grid>
-
-    <Window.Resources>
-        <!-- Bool to Visibility Converter -->
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        
-        <!-- Bool to Status Converter -->
-        <local:BoolToStatusConverter x:Key="BoolToStatusConverter"/>
-    </Window.Resources>
 </Window>
