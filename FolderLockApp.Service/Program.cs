@@ -6,17 +6,29 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 
-// Configure Serilog
+// Configure Serilog with enhanced logging
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.File(
         path: Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), 
             "FolderLockApp", "Logs", "service-.log"),
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 30,
+        fileSizeLimitBytes: 10_485_760, // 10 MB per file
+        rollOnFileSizeLimit: true,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), 
+            "FolderLockApp", "Logs", "security-.log"),
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 90, // Keep security logs longer
+        fileSizeLimitBytes: 10_485_760,
+        rollOnFileSizeLimit: true,
+        restrictedToMinimumLevel: LogEventLevel.Warning,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [Security] {Message:lj}{NewLine}{Exception}")
     .WriteTo.EventLog(
         source: "FolderLockApp Service",
         logName: "Application",

@@ -19,6 +19,7 @@ public class EncryptionBackgroundService : BackgroundService
     private readonly Dictionary<string, FileSystemWatcher> _folderWatchers = new();
     private readonly object _lockObject = new();
     private NamedPipeServer? _pipeServer;
+    private AutoLockService? _autoLockService;
 
     public EncryptionBackgroundService(
         ILogger<EncryptionBackgroundService> logger,
@@ -56,10 +57,26 @@ public class EncryptionBackgroundService : BackgroundService
 
             // Start monitoring all locked folders
             StartMonitoringLockedFolders();
+
+            // Initialize Auto-Lock Service
+            var folderRegistry = scope.ServiceProvider.GetRequiredService<IFolderRegistry>();
+            var encryptionEngine = scope.ServiceProvider.GetRequiredService<IEncryptionEngine>();
+            var autoLockLogger = scope.ServiceProvider.GetRequiredService<ILogger<AutoLockService>>();
+            var settings = new FolderLockSettings
+            {
+                AutoLockEnabled = true,
+                AutoLockTimeoutMinutes = 5, // Default: 5 minutes
+                ShowAutoLockNotification = true
+            };
+            _autoLockService = new AutoLockService(folderRegistry, encryptionEngine, autoLockLogger, settings);
+            
+            _logger.LogInformation("Auto-Lock Service started with {Timeout} minute timeout", settings.AutoLockTimeoutMinutes);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading locked folders during service startup");
+            var (isRecoverable, userMessage, technicalDetails) = ErrorHandler.HandleFileSystemError(ex, "service startup", "");
+            _logger.LogError(ex, "Error loading locked folders during service startup - {TechnicalDetails}", technicalDetails);
+            ErrorHandler.LogSecurityEvent(_logger, "SERVICE_START_FAILED", "N/A", false, technicalDetails);
             throw;
         }
 
@@ -107,6 +124,13 @@ public class EncryptionBackgroundService : BackgroundService
 
         try
         {
+            // Stop Auto-Lock Service
+            if (_autoLockService != null)
+            {
+                _autoLockService.Dispose();
+                _logger.LogInformation("Auto-Lock Service stopped");
+            }
+
             // Stop Named Pipe server
             if (_pipeServer != null)
             {
@@ -417,16 +441,27 @@ public class EncryptionBackgroundService : BackgroundService
             // Stop monitoring this folder since it's now unlocked
             StopMonitoringFolder(folderPath);
 
+            // Register folder for auto-lock monitoring
+            if (_autoLockService != null)
+            {
+                _autoLockService.RegisterFolderForAutoLock(folderPath, password);
+                _logger.LogInformation("Folder registered for auto-lock monitoring: {FolderPath}", folderPath);
+            }
+
             // Reload locked folders list
             await LoadLockedFoldersAsync();
 
             _logger.LogInformation("Folder unlocked successfully: {FolderPath}", folderPath);
+            ErrorHandler.LogSecurityEvent(_logger, "UNLOCK_SUCCESS", folderPath, true, $"Files processed: {decryptionResult.FilesProcessed}");
             return (true, "Folder unlocked successfully.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error unlocking folder: {FolderPath}", folderPath);
-            return (false, $"Error: {ex.Message}");
+            var (isRecoverable, userMessage, technicalDetails) = ErrorHandler.HandleEncryptionError(ex, "folder unlock");
+            _logger.LogError(ex, "Error unlocking folder: {FolderPath} - {TechnicalDetails}", folderPath, technicalDetails);
+            ErrorHandler.LogSecurityEvent(_logger, "UNLOCK_FAILED", folderPath, false, technicalDetails);
+            return (false, ErrorHandler.FormatUserErrorMessage("Unlock Failed", userMessage, 
+                isRecoverable ? "Please try again." : "Please contact support if this problem persists."));
         }
     }
 
@@ -468,12 +503,16 @@ public class EncryptionBackgroundService : BackgroundService
             await ReloadLockedFoldersAsync();
 
             _logger.LogInformation("Folder locked successfully: {FolderPath}", folderPath);
+            ErrorHandler.LogSecurityEvent(_logger, "LOCK_SUCCESS", folderPath, true, $"Files processed: {encryptionResult.FilesProcessed}");
             return (true, "Folder locked successfully.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error locking folder: {FolderPath}", folderPath);
-            return (false, $"Error: {ex.Message}");
+            var (isRecoverable, userMessage, technicalDetails) = ErrorHandler.HandleEncryptionError(ex, "folder lock");
+            _logger.LogError(ex, "Error locking folder: {FolderPath} - {TechnicalDetails}", folderPath, technicalDetails);
+            ErrorHandler.LogSecurityEvent(_logger, "LOCK_FAILED", folderPath, false, technicalDetails);
+            return (false, ErrorHandler.FormatUserErrorMessage("Lock Failed", userMessage,
+                isRecoverable ? "Please try again." : "Please contact support if this problem persists."));
         }
     }
 
