@@ -1,0 +1,291 @@
+<Window x:Class="FolderLockApp.GUI.Views.TutorialWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="FolderLock Tutorial" 
+        Height="500" 
+        Width="650"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F5F5F5">
+    
+    <Window.Resources>
+        <Style x:Key="StepNumberStyle" TargetType="Border">
+            <Setter Property="Background" Value="#3498DB"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Margin" Value="0,0,15,0"/>
+        </Style>
+        
+        <Style x:Key="StepTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+        
+        <Style x:Key="StepDescriptionStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#7F8C8D"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#3498DB" Padding="30,20">
+            <StackPanel>
+                <TextBlock Text="📚 Interactive Tutorial" 
+                          FontSize="24" 
+                          FontWeight="Bold" 
+                          Foreground="White"/>
+                <TextBlock Text="Learn how to lock your first folder" 
+                          FontSize="14" 
+                          Foreground="#ECF0F1" 
+                          Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="30,20">
+            <StackPanel>
+                <!-- Step 1 -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        Padding="20" 
+                        Margin="0,0,0,15"
+                        Effect="{DynamicResource {x:Static SystemParameters.DropShadowKey}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource StepNumberStyle}">
+                            <TextBlock Text="1" 
+                                      FontSize="20" 
+                                      FontWeight="Bold" 
+                                      Foreground="White" 
+                                      HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Style="{StaticResource StepTitleStyle}">
+                                Select a Folder to Lock
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}">
+                                Click the "Lock Folder" button in the main window. A folder browser dialog will appear. 
+                                Navigate to the folder you want to protect and click "Select Folder".
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}" 
+                                      Margin="0,10,0,0"
+                                      Foreground="#E67E22">
+                                💡 Tip: Start with a test folder containing non-critical files.
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <!-- Step 2 -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        Padding="20" 
+                        Margin="0,0,0,15"
+                        Effect="{DynamicResource {x:Static SystemParameters.DropShadowKey}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource StepNumberStyle}">
+                            <TextBlock Text="2" 
+                                      FontSize="20" 
+                                      FontWeight="Bold" 
+                                      Foreground="White" 
+                                      HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Style="{StaticResource StepTitleStyle}">
+                                Create a Strong Password
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}">
+                                Enter a password (minimum 8 characters). Use a combination of uppercase, lowercase, 
+                                numbers, and special characters for maximum security.
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}" 
+                                      Margin="0,10,0,0"
+                                      Foreground="#E74C3C">
+                                ⚠️ Warning: Lost passwords cannot be recovered!
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <!-- Step 3 -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        Padding="20" 
+                        Margin="0,0,0,15"
+                        Effect="{DynamicResource {x:Static SystemParameters.DropShadowKey}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource StepNumberStyle}">
+                            <TextBlock Text="3" 
+                                      FontSize="20" 
+                                      FontWeight="Bold" 
+                                      Foreground="White" 
+                                      HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Style="{StaticResource StepTitleStyle}">
+                                Wait for Encryption
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}">
+                                FolderLock will encrypt all files in the folder. A progress bar shows the encryption status. 
+                                This may take a few moments depending on the folder size.
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}" 
+                                      Margin="0,10,0,0"
+                                      Foreground="#27AE60">
+                                ✓ Your files are being protected with AES-256 encryption.
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <!-- Step 4 -->
+                <Border Background="White" 
+                        CornerRadius="8" 
+                        Padding="20" 
+                        Margin="0,0,0,15"
+                        Effect="{DynamicResource {x:Static SystemParameters.DropShadowKey}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource StepNumberStyle}">
+                            <TextBlock Text="4" 
+                                      FontSize="20" 
+                                      FontWeight="Bold" 
+                                      Foreground="White" 
+                                      HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Style="{StaticResource StepTitleStyle}">
+                                Unlock When Needed
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}">
+                                To access your files, select the locked folder from the list and click "Unlock Folder". 
+                                Enter your password, and the files will be decrypted and accessible again.
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource StepDescriptionStyle}" 
+                                      Margin="0,10,0,0"
+                                      Foreground="#E67E22">
+                                💡 Tip: The folder will auto-lock after 5 minutes of inactivity.
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <!-- Additional Features -->
+                <Border Background="#E8F5E9" 
+                        BorderBrush="#4CAF50" 
+                        BorderThickness="2" 
+                        CornerRadius="8" 
+                        Padding="20" 
+                        Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="🎯 Pro Tips" 
+                                  FontSize="16" 
+                                  FontWeight="Bold" 
+                                  Foreground="#2E7D32"
+                                  Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" 
+                                  FontSize="13" 
+                                  Foreground="#2E7D32"
+                                  Margin="0,5">
+                            • Right-click folders in Windows Explorer for quick lock/unlock
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" 
+                                  FontSize="13" 
+                                  Foreground="#2E7D32"
+                                  Margin="0,5">
+                            • Check the system tray for FolderLock status
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" 
+                                  FontSize="13" 
+                                  Foreground="#2E7D32"
+                                  Margin="0,5">
+                            • View logs at C:\ProgramData\FolderLockApp\Logs\
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" 
+                Background="White" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="0,1,0,0" 
+                Padding="30,15">
+            <Grid>
+                <Button x:Name="CloseButton"
+                       Content="Got It!"
+                       HorizontalAlignment="Right"
+                       Padding="30,10"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Background="#27AE60"
+                       Foreground="White"
+                       BorderThickness="0"
+                       Cursor="Hand"
+                       Click="CloseButton_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" 
+                                                VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#229954"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

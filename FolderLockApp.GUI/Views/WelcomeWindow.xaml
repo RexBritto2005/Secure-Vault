@@ -1,0 +1,240 @@
+<Window x:Class="FolderLockApp.GUI.Views.WelcomeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Welcome to FolderLock" 
+        Height="550" 
+        Width="700"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F5F5F5">
+    
+    <Window.Resources>
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        
+        <Style x:Key="SubHeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#7F8C8D"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+        
+        <Style x:Key="FeatureTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#34495E"/>
+            <Setter Property="Margin" Value="10,5,0,5"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3498DB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2980B9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background" Value="#95A5A6"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#7F8C8D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#3498DB" Padding="30,20">
+            <StackPanel>
+                <TextBlock Text="🔒 Welcome to FolderLock" 
+                          FontSize="28" 
+                          FontWeight="Bold" 
+                          Foreground="White"/>
+                <TextBlock Text="Secure your folders with military-grade encryption" 
+                          FontSize="14" 
+                          Foreground="#ECF0F1" 
+                          Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="30,20">
+            <StackPanel>
+                <!-- Introduction -->
+                <TextBlock Style="{StaticResource HeaderTextStyle}">
+                    Getting Started
+                </TextBlock>
+                
+                <TextBlock Style="{StaticResource SubHeaderTextStyle}">
+                    FolderLock protects your sensitive files with AES-256 encryption. 
+                    Lock folders with a password, and they'll remain encrypted until you unlock them.
+                </TextBlock>
+                
+                <!-- Features -->
+                <TextBlock Style="{StaticResource HeaderTextStyle}" Margin="0,20,0,10">
+                    Key Features
+                </TextBlock>
+                
+                <StackPanel Margin="0,0,0,20">
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="🔐" FontSize="20" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource FeatureTextStyle}">
+                            <Bold>Military-Grade Encryption:</Bold> AES-256 encryption with PBKDF2 key derivation
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="⚡" FontSize="20" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource FeatureTextStyle}">
+                            <Bold>Fast &amp; Efficient:</Bold> Encrypt entire folders in seconds
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="🛡️" FontSize="20" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource FeatureTextStyle}">
+                            <Bold>Tamper Detection:</Bold> HMAC verification ensures file integrity
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="🔄" FontSize="20" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource FeatureTextStyle}">
+                            <Bold>Auto-Lock:</Bold> Automatically re-lock folders after inactivity
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="📁" FontSize="20" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource FeatureTextStyle}">
+                            <Bold>Context Menu:</Bold> Lock/unlock folders directly from Windows Explorer
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Quick Start -->
+                <TextBlock Style="{StaticResource HeaderTextStyle}" Margin="0,10,0,10">
+                    Quick Start Guide
+                </TextBlock>
+                
+                <StackPanel Margin="10,0,0,20">
+                    <TextBlock Style="{StaticResource FeatureTextStyle}" Margin="0,5">
+                        <Bold>1.</Bold> Click "Lock Folder" and select a folder to protect
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource FeatureTextStyle}" Margin="0,5">
+                        <Bold>2.</Bold> Enter a strong password (minimum 8 characters)
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource FeatureTextStyle}" Margin="0,5">
+                        <Bold>3.</Bold> Your folder is now encrypted and protected
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource FeatureTextStyle}" Margin="0,5">
+                        <Bold>4.</Bold> To access files, click "Unlock Folder" and enter your password
+                    </TextBlock>
+                </StackPanel>
+                
+                <!-- Important Notes -->
+                <Border Background="#FFF3CD" 
+                        BorderBrush="#FFC107" 
+                        BorderThickness="1" 
+                        CornerRadius="4" 
+                        Padding="15"
+                        Margin="0,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="⚠️ Important Security Notes" 
+                                  FontWeight="Bold" 
+                                  FontSize="14" 
+                                  Foreground="#856404"
+                                  Margin="0,0,0,10"/>
+                        <TextBlock TextWrapping="Wrap" 
+                                  FontSize="12" 
+                                  Foreground="#856404">
+                            • <Bold>Remember your passwords!</Bold> Lost passwords cannot be recovered.
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" 
+                                  FontSize="12" 
+                                  Foreground="#856404"
+                                  Margin="0,5,0,0">
+                            • <Bold>Keep backups</Bold> of important files before encryption.
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" 
+                                  FontSize="12" 
+                                  Foreground="#856404"
+                                  Margin="0,5,0,0">
+                            • <Bold>Unlock folders</Bold> before uninstalling the application.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- Footer Buttons -->
+        <Border Grid.Row="2" 
+                Background="White" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="0,1,0,0" 
+                Padding="30,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <CheckBox x:Name="DontShowAgainCheckBox" 
+                         Grid.Column="0"
+                         Content="Don't show this again" 
+                         VerticalAlignment="Center"
+                         FontSize="12"
+                         Foreground="#7F8C8D"/>
+                
+                <Button x:Name="TutorialButton"
+                       Grid.Column="2"
+                       Content="Show Tutorial"
+                       Style="{StaticResource SecondaryButtonStyle}"
+                       Margin="0,0,10,0"
+                       Click="TutorialButton_Click"/>
+                
+                <Button x:Name="GetStartedButton"
+                       Grid.Column="3"
+                       Content="Get Started"
+                       Style="{StaticResource PrimaryButtonStyle}"
+                       Click="GetStartedButton_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

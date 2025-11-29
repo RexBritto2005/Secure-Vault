@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Input;
 using FolderLockApp.Core.Interfaces;
 using FolderLockApp.Core.Models;
+using FolderLockApp.Core.Services;
+using Microsoft.Extensions.Logging;
 
 namespace FolderLockApp.GUI.ViewModels;
 
