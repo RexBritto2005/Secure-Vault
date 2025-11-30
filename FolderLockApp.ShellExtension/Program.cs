@@ -1,4 +1,5 @@
 using System;
+using FolderLockApp.Core.Helpers;
 
 namespace FolderLockApp.ShellExtension;
 
@@ -13,14 +14,52 @@ class Program
         Console.WriteLine("FolderLock Shell Extension Registration Tool");
         Console.WriteLine("=============================================\n");
 
-        if (!ShellExtensionRegistration.IsAdministrator())
+        // Verify code integrity
+        Console.WriteLine("Verifying code integrity...");
+        var integrityResult = CodeIntegrityVerifier.VerifyCurrentAssembly();
+        
+        if (!integrityResult.IsValid)
         {
-            Console.WriteLine("ERROR: This tool must be run as Administrator!");
-            Console.WriteLine("Please right-click and select 'Run as Administrator'.");
+            Console.WriteLine("ERROR: Code integrity verification failed!");
+            Console.WriteLine($"Reason: {integrityResult.ErrorMessage}");
+            Console.WriteLine("\nThe application files may have been tampered with.");
+            Console.WriteLine("Please reinstall from a trusted source.");
+            
+            #if !DEBUG
             Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
             return;
+            #else
+            Console.WriteLine("\nWARNING: Running in DEBUG mode - continuing anyway...");
+            #endif
         }
+        else
+        {
+            Console.WriteLine("✓ Code integrity verified\n");
+        }
+
+        // Check for admin privileges
+        if (!AdminPrivilegeHelper.IsRunningAsAdmin())
+        {
+            Console.WriteLine("ERROR: This tool must be run as Administrator!");
+            Console.WriteLine("Please right-click and select 'Run as Administrator'.");
+            
+            Console.WriteLine("\nAttempting to restart with elevated privileges...");
+            if (AdminPrivilegeHelper.RestartAsAdmin(args))
+            {
+                Console.WriteLine("Restarting with administrator privileges...");
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Failed to elevate privileges.");
+                Console.WriteLine("\nPress any key to exit...");
+                Console.ReadKey();
+                return;
+            }
+        }
+        
+        Console.WriteLine("✓ Running with administrator privileges\n");
 
         if (args.Length == 0)
         {

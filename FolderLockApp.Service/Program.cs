@@ -2,6 +2,7 @@ using FolderLockApp.Service;
 using FolderLockApp.Core.Interfaces;
 using FolderLockApp.Core.Services;
 using FolderLockApp.Core.Data;
+using FolderLockApp.Core.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -38,6 +39,39 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting FolderLockApp Service");
+
+    // Verify code integrity
+    var integrityResult = CodeIntegrityVerifier.VerifyCurrentAssembly();
+    if (!integrityResult.IsValid)
+    {
+        Log.Fatal("Code integrity verification failed: {ErrorMessage}", integrityResult.ErrorMessage);
+        Log.Fatal("Assembly: {AssemblyName}, Path: {AssemblyPath}", 
+            integrityResult.AssemblyName, integrityResult.AssemblyPath);
+        
+        #if !DEBUG
+        Console.WriteLine("FATAL: Code integrity verification failed!");
+        Console.WriteLine($"Error: {integrityResult.ErrorMessage}");
+        Console.WriteLine("The service cannot start due to security concerns.");
+        return;
+        #else
+        Log.Warning("Running in DEBUG mode - integrity check bypassed");
+        #endif
+    }
+    else
+    {
+        Log.Information("Code integrity verification passed");
+    }
+
+    // Check for admin privileges (required for Windows Service)
+    if (!AdminPrivilegeHelper.IsRunningAsAdmin())
+    {
+        Log.Fatal("Service must be run with administrator privileges");
+        Console.WriteLine("ERROR: This service must be run as Administrator!");
+        Console.WriteLine("Please install and start the service using an elevated command prompt.");
+        return;
+    }
+
+    Log.Information("Administrator privileges confirmed");
 
     var builder = Host.CreateApplicationBuilder(args);
     
