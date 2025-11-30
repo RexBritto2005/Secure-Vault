@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using FolderLockApp.Core.Interfaces;
 using FolderLockApp.Core.Services;
 using FolderLockApp.Core.Data;
+using FolderLockApp.Core.Helpers;
 using FolderLockApp.GUI.ViewModels;
 using FolderLockApp.GUI.Views;
 
@@ -54,6 +55,66 @@ public partial class App : Application
     {
         try
         {
+            // Verify code integrity
+            if (!VerifyCodeIntegrity())
+            {
+                MessageBox.Show(
+                    "Code integrity verification failed!\n\n" +
+                    "The application files may have been tampered with or corrupted.\n" +
+                    "Please reinstall the application from a trusted source.",
+                    "Security Warning",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                Shutdown(1);
+                return;
+            }
+
+            // Check for admin privileges
+            if (!AdminPrivilegeHelper.IsRunningAsAdmin())
+            {
+                var result = MessageBox.Show(
+                    "FolderLock requires administrator privileges to function properly.\n\n" +
+                    "This is needed for:\n" +
+                    "• Managing folder encryption\n" +
+                    "• Controlling the background service\n" +
+                    "• Registering shell extensions\n\n" +
+                    "Would you like to restart with administrator privileges?",
+                    "Administrator Privileges Required",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    if (AdminPrivilegeHelper.RestartAsAdmin(e.Args))
+                    {
+                        Shutdown(0);
+                        return;
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            "Failed to restart with administrator privileges.\n\n" +
+                            "Please right-click the application and select 'Run as administrator'.",
+                            "Elevation Failed",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        Shutdown(1);
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "The application will now exit.\n\n" +
+                        "Administrator privileges are required for proper operation.",
+                        "Application Exit",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    Shutdown(0);
+                    return;
+                }
+            }
+
             await _host.StartAsync();
 
             // Initialize database by ensuring DbContext is created
@@ -217,6 +278,46 @@ public partial class App : Application
                 "Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Verifies the integrity of the application code.
+    /// </summary>
+    private bool VerifyCodeIntegrity()
+    {
+        try
+        {
+            var result = CodeIntegrityVerifier.VerifyCurrentAssembly();
+            
+            if (!result.IsValid)
+            {
+                System.Diagnostics.Debug.WriteLine($"Code integrity check failed: {result.ErrorMessage}");
+                System.Diagnostics.Debug.WriteLine($"Assembly: {result.AssemblyName}");
+                System.Diagnostics.Debug.WriteLine($"Path: {result.AssemblyPath}");
+                System.Diagnostics.Debug.WriteLine($"Hash: {result.FileHash}");
+                
+                // In development/debug mode, allow unsigned assemblies
+                #if DEBUG
+                System.Diagnostics.Debug.WriteLine("WARNING: Running in DEBUG mode - integrity check bypassed");
+                return true;
+                #else
+                return false;
+                #endif
+            }
+
+            System.Diagnostics.Debug.WriteLine("Code integrity verification passed");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Code integrity verification error: {ex.Message}");
+            
+            #if DEBUG
+            return true;
+            #else
+            return false;
+            #endif
         }
     }
 

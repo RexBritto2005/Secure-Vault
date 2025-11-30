@@ -8,6 +8,7 @@
     <EnableComHosting>true</EnableComHosting>
     <EnableRegFreeCom>true</EnableRegFreeCom>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

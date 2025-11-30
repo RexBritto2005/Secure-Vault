@@ -1,0 +1,69 @@
+<Window x:Class="FolderLockApp.AllInOne.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FolderLock - All-in-One" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2196F3" Padding="20,15">
+            <StackPanel>
+                <TextBlock Text="🔒 FolderLock" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Secure Folder Encryption" FontSize="14" Foreground="#E3F2FD" Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Toolbar -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                <Button x:Name="LockButton" Content="🔒 Lock Folder" Padding="15,10" Margin="0,0,10,0" Click="LockButton_Click"/>
+                <Button x:Name="UnlockButton" Content="🔓 Unlock Folder" Padding="15,10" Margin="0,0,10,0" Click="UnlockButton_Click"/>
+                <Button x:Name="RefreshButton" Content="🔄 Refresh" Padding="15,10" Click="RefreshButton_Click"/>
+            </StackPanel>
+
+            <!-- Locked Folders List -->
+            <Border Grid.Row="1" BorderBrush="#BDBDBD" BorderThickness="1" CornerRadius="4">
+                <Grid>
+                    <ListView x:Name="FoldersListView" SelectionMode="Single">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Folder Path" Width="400" DisplayMemberBinding="{Binding Path}"/>
+                                <GridViewColumn Header="Status" Width="100" DisplayMemberBinding="{Binding Status}"/>
+                                <GridViewColumn Header="Locked At" Width="150" DisplayMemberBinding="{Binding LockedAt}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    
+                    <!-- Empty State -->
+                    <StackPanel x:Name="EmptyState" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+                        <TextBlock Text="📁" FontSize="48" HorizontalAlignment="Center" Opacity="0.3"/>
+                        <TextBlock Text="No locked folders" FontSize="16" Foreground="#757575" Margin="0,10,0,0"/>
+                        <TextBlock Text="Click 'Lock Folder' to get started" FontSize="14" Foreground="#9E9E9E" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="15,10">
+            <Grid>
+                <TextBlock x:Name="StatusText" Text="Ready" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="●" Foreground="Green" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Text="Service Running" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
