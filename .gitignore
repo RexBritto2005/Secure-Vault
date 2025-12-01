@@ -107,3 +107,14 @@ $RECYCLE.BIN/
 TestResults/
 *.trx
 *.coverage
+
+# Build output directories
+Output/
+Standalone-Release/
+publish/
+
+# Application data
+**/FolderLockApp/Logs/
+folderlock.db
+folderlock.db-shm
+folderlock.db-wal

@@ -1,398 +1,524 @@
-# FolderLock - Secure Folder Encryption Application
+# 🔒 FolderLock - Secure Folder Encryption
 
-A comprehensive Windows application for encrypting and managing folder security with AES-256 encryption.
+A Windows desktop application for encrypting folders with AES-256 encryption. Simple, secure, and standalone.
 
-## 🚀 Quick Links
+---
 
-- **[Quick Start Guide](QUICK_START.md)** - Get running in 5 minutes
-- **[Complete User Guide](USER_GUIDE.md)** - Detailed usage instructions
-- **[How It Works](HOW_IT_WORKS.md)** - Architecture and technical details
-- **[Security Features](SECURITY_FEATURES.md)** - Security implementation
-- **[Admin Setup Guide](ADMIN_SETUP_GUIDE.md)** - Installation and configuration
+## 🚀 Quick Start
 
-## 📋 Overview
+### Build the Application
 
-FolderLock is a Windows desktop application that provides military-grade encryption for your folders. It features:
+**Single Command:**
+```cmd
+build.bat
+```
 
-- **🔒 AES-256 Encryption** - Industry-standard encryption
-- **🖥️ User-Friendly GUI** - Easy-to-use interface
-- **⚡ Background Service** - Automatic folder monitoring
-- **🖱️ Shell Integration** - Right-click menu in Windows Explorer
-- **⏰ Auto-Lock** - Automatic locking based on timers
-- **🔐 Secure** - Admin privileges and code integrity verification
+This creates: `Release\FolderLockApp.AllInOne.exe` (~80-100 MB)
 
-## 🎯 Key Features
+### Run the Application
 
-### For Users
-- Lock/unlock folders with password protection
-- Right-click context menu integration
-- Automatic folder locking (timer-based)
-- Visual status indicators
-- Password-protected access
-- Backup-friendly (encrypted files can be backed up)
+1. Navigate to `Release` folder
+2. Double-click `FolderLockApp.AllInOne.exe`
+3. Accept UAC prompt (admin privileges required)
+4. Start locking folders!
 
-### For Security
-- AES-256-CBC encryption
-- PBKDF2 key derivation (100,000+ iterations)
-- Unique salt per folder
-- No password storage (only hashes)
-- Code integrity verification
-- Administrator privilege enforcement
-- Comprehensive audit logging
+---
 
-### For Developers
-- Modular architecture
-- Clean separation of concerns
-- SQLite database
-- IPC communication (Named Pipes)
-- Extensive error handling
-- Property-based testing
+## 📋 What is FolderLock?
 
-## 🏗️ Architecture
+FolderLock encrypts your folders with military-grade AES-256 encryption. Only you can unlock them with your password.
+
+### Features
+
+- ✅ **AES-256 Encryption** - Military-grade security
+- ✅ **Password Protected** - Only you can unlock
+- ✅ **Standalone Executable** - No installation needed
+- ✅ **Self-Contained** - Includes .NET runtime
+- ✅ **Admin Privileges** - Automatic UAC elevation
+- ✅ **Code Integrity** - Verifies files aren't tampered
+- ✅ **Background Service** - Built-in encryption service
+- ✅ **Auto-Lock** - Automatic folder locking (timer-based)
+
+---
+
+## 💻 Usage
+
+### Lock a Folder
+
+1. Click **"Lock Folder"** button
+2. Browse to folder you want to protect
+3. Enter a strong password (twice)
+4. Click **"Lock"**
+5. Wait for encryption to complete
+
+**Result:** All files encrypted with `.locked` extension
+
+### Unlock a Folder
+
+1. Select folder from the list
+2. Click **"Unlock"** button
+3. Enter your password
+4. Wait for decryption
+
+**Result:** Files restored to original state
+
+---
+
+## ⚠️ CRITICAL WARNINGS
+
+### 🚨 NEVER FORGET YOUR PASSWORD
+
+**If you forget your password, your files CANNOT be recovered.**
+
+This is by design for security. There is no password recovery, no backdoor, no way to decrypt without the correct password.
+
+### 🚨 BACKUP FIRST
+
+Always backup important files before locking them for the first time.
+
+### 🚨 TEST IMMEDIATELY
+
+After locking a folder, **immediately unlock it** to verify your password works.
+
+### 🚨 WRITE IT DOWN
+
+Store your password in a safe place:
+- Password manager
+- Secure note
+- Physical safe
+
+**DO NOT** rely on memory alone for critical files.
+
+---
+
+## 🔧 System Requirements
+
+- **OS:** Windows 10 or Windows 11
+- **Privileges:** Administrator (automatic UAC prompt)
+- **Disk Space:** ~100 MB for application
+- **RAM:** 512 MB minimum
+- **.NET:** Included (self-contained)
+
+---
+
+## 🏗️ Project Structure
 
 ```
-┌─────────────────────────────────────────┐
-│         FolderLock System               │
-├─────────────────────────────────────────┤
-│                                         │
-│  GUI App  ←→  Background Service        │
-│     ↓              ↓                    │
-│  Core Library (Encryption, Database)    │
-│     ↑                                   │
-│  Shell Extension (Right-Click Menu)     │
-│                                         │
-└─────────────────────────────────────────┘
+FolderLockApp/
+├── FolderLockApp.Core/          # Encryption engine & database
+├── FolderLockApp.GUI/           # Desktop interface (WPF)
+├── FolderLockApp.Service/       # Background service
+├── FolderLockApp.AllInOne/      # Combined application
+├── build.bat                    # Build script
+└── README.md                    # This file
 ```
 
 ### Components
 
-1. **FolderLockApp.GUI** - WPF desktop application
-2. **FolderLockApp.Service** - Windows background service
-3. **FolderLockApp.Core** - Shared business logic
-4. **FolderLockApp.ShellExtension** - Windows Explorer integration
+**FolderLockApp.Core**
+- AES-256 encryption engine
+- SQLite database
+- Folder registry
+- Security helpers
 
-## 🚀 Getting Started
+**FolderLockApp.GUI**
+- WPF desktop interface
+- Lock/unlock controls
+- Folder list view
+- Settings management
+
+**FolderLockApp.Service**
+- Background encryption service
+- Auto-lock monitoring
+- File system watching
+
+**FolderLockApp.AllInOne**
+- Combines GUI + Service
+- Single executable
+- No separate installation
+
+---
+
+## 🔐 Security Details
+
+### Encryption
+
+- **Algorithm:** AES-256-CBC
+- **Key Size:** 256 bits
+- **Block Size:** 128 bits
+- **Mode:** CBC (Cipher Block Chaining)
+- **Padding:** PKCS7
+
+### Key Derivation
+
+- **Method:** PBKDF2
+- **Hash:** SHA-256
+- **Iterations:** 100,000+
+- **Salt:** Unique per folder
+- **Output:** 256-bit key
+
+### Security Features
+
+- ✅ Passwords never stored (only hashes)
+- ✅ Unique salt per folder
+- ✅ Unique IV per file
+- ✅ Admin privilege enforcement
+- ✅ Code integrity verification
+- ✅ Secure audit logging
+
+---
+
+## 📁 File Locations
+
+### Application
+
+- **Executable:** `Release\FolderLockApp.AllInOne.exe`
+- **Size:** ~80-100 MB (includes .NET runtime)
+
+### Data Files
+
+- **Database:** `%ProgramData%\FolderLockApp\folderlock.db`
+- **Logs:** `%ProgramData%\FolderLockApp\Logs\`
+
+To open data folder:
+```cmd
+explorer %ProgramData%\FolderLockApp
+```
+
+---
+
+## 🛠️ Building from Source
 
 ### Prerequisites
-- Windows 10 or Windows 11
-- .NET 8.0 SDK (for building)
-- .NET 8.0 Runtime (for running)
-- Administrator privileges
 
-### Quick Installation
+- .NET 8.0 SDK
+- Windows 10/11
+- Visual Studio 2022 (optional)
 
-1. **Build the application:**
+### Build Commands
+
+**Simple Build (Development):**
 ```cmd
 dotnet build --configuration Release
 ```
 
-2. **Install the service:**
-```powershell
-# Run as Administrator
-cd FolderLockApp.Service\bin\Release\net8.0
-$servicePath = (Get-Location).Path + "\FolderLockApp.Service.exe"
-sc.exe create "FolderLockApp Encryption Service" binPath=$servicePath
-sc.exe start "FolderLockApp Encryption Service"
-```
-
-3. **Launch the GUI:**
+**Standalone Executable (Distribution):**
 ```cmd
-# Navigate to GUI folder
-cd FolderLockApp.GUI\bin\Release\net8.0-windows
-# Double-click FolderLockApp.GUI.exe or run:
-.\FolderLockApp.GUI.exe
+build.bat
 ```
 
-4. **Optional - Install shell extension:**
+**Manual Build:**
 ```cmd
-# Run as Administrator
-cd FolderLockApp.ShellExtension\bin\Release\net8.0-windows
-FolderLockApp.ShellExtension.exe register
+dotnet publish FolderLockApp.AllInOne\FolderLockApp.AllInOne.csproj ^
+    --configuration Release ^
+    --runtime win-x64 ^
+    --self-contained true ^
+    --output .\Release ^
+    /p:PublishSingleFile=true
 ```
 
-For detailed instructions, see **[QUICK_START.md](QUICK_START.md)**
+### Build Output
 
-## 📖 Usage
+- **Location:** `Release\FolderLockApp.AllInOne.exe`
+- **Type:** Self-contained single file
+- **Runtime:** Included (.NET 8.0)
+- **Size:** ~80-100 MB
 
-### Lock a Folder
+---
 
-**Using GUI:**
-1. Launch FolderLockApp.GUI
-2. Click "Lock Folder"
-3. Select folder and enter password
-4. Click "Lock"
+## 🐛 Troubleshooting
 
-**Using Right-Click:**
-1. Right-click any folder
-2. Select "Lock Folder"
-3. Enter password
-4. Done!
+### "Administrator Privileges Required"
 
-### Unlock a Folder
+**Problem:** Application won't start or shows privilege error
 
-**Using GUI:**
-1. Select locked folder from list
-2. Click "Unlock"
-3. Enter password
+**Solution:** Right-click `FolderLockApp.AllInOne.exe` and select "Run as administrator"
 
-**Using Right-Click:**
-1. Right-click locked folder
-2. Select "Unlock Folder"
-3. Enter password
+### "Code Integrity Verification Failed"
 
-For complete usage instructions, see **[USER_GUIDE.md](USER_GUIDE.md)**
+**Problem:** Security warning on startup
 
-## 🔒 Security
+**Solution:** 
+- Normal for debug builds
+- For production, sign the executable with a code signing certificate
+- In development, this warning can be ignored
 
-### Encryption
-- **Algorithm**: AES-256-CBC
-- **Key Derivation**: PBKDF2-SHA256 (100,000+ iterations)
-- **Unique IVs**: Each file has unique initialization vector
-- **Salt**: Unique salt per folder
+### Can't Unlock - Wrong Password
 
-### Application Security
-- **Admin Privileges**: Required and enforced
-- **Code Integrity**: Digital signature verification
-- **No Key Storage**: Keys derived from password, never stored
-- **Audit Logging**: All operations logged
+**Problem:** Entered password doesn't work
 
-### Best Practices
-✅ Use strong, unique passwords
-✅ Backup encrypted folders regularly
-✅ Test unlock immediately after locking
-✅ Keep the application updated
-✅ Review security logs periodically
+**Solution:**
+- Try again (check Caps Lock)
+- If truly forgotten, files **cannot be recovered**
+- Restore from backup if available
 
-For detailed security information, see **[SECURITY_FEATURES.md](SECURITY_FEATURES.md)**
+### Application Crashes on Startup
 
-## 📁 Project Structure
+**Problem:** Application closes immediately
 
-```
-FolderLockApp/
-├── FolderLockApp.Core/          # Core business logic
-│   ├── Data/                    # Database context
-│   ├── Interfaces/              # Service contracts
-│   ├── Models/                  # Data models
-│   ├── Services/                # Business services
-│   ├── Helpers/                 # Utility classes
-│   └── Tests/                   # Unit tests
-│
-├── FolderLockApp.GUI/           # WPF desktop application
-│   ├── Views/                   # XAML views
-│   ├── ViewModels/              # View models
-│   └── app.manifest             # UAC manifest
-│
-├── FolderLockApp.Service/       # Background Windows service
-│   ├── Program.cs               # Service entry point
-│   └── EncryptionBackgroundService.cs
-│
-├── FolderLockApp.ShellExtension/  # Windows Explorer integration
-│   ├── FolderLockContextMenu.cs   # Context menu handler
-│   ├── ShellExtensionRegistration.cs
-│   └── app.manifest               # UAC manifest
-│
-└── Documentation/
-    ├── README.md                # This file
-    ├── QUICK_START.md           # Quick start guide
-    ├── USER_GUIDE.md            # Complete user guide
-    ├── HOW_IT_WORKS.md          # Technical details
-    ├── SECURITY_FEATURES.md     # Security documentation
-    └── ADMIN_SETUP_GUIDE.md     # Admin guide
-```
+**Solution:**
+1. Check logs: `%ProgramData%\FolderLockApp\Logs\`
+2. Ensure .NET 8.0 runtime is available (should be included)
+3. Run as administrator
+4. Check Windows Event Viewer for errors
 
-## 🛠️ Development
+### Slow Encryption/Decryption
 
-### Building from Source
+**Problem:** Taking too long to lock/unlock
 
-```cmd
-# Clone the repository
-git clone <repository-url>
-cd FolderLockApp
+**Normal for:**
+- Large folders (many GB)
+- Many small files
+- Slow storage (HDD vs SSD)
 
-# Restore dependencies
-dotnet restore
+**Tips:**
+- Close other applications
+- Ensure adequate free disk space
+- Use SSD for better performance
 
-# Build all projects
-dotnet build
-
-# Run tests
-dotnet test FolderLockApp.Core
-```
-
-### Running in Development
-
-```cmd
-# Run the GUI (Debug mode)
-cd FolderLockApp.GUI
-dotnet run
-
-# Run the service (Debug mode)
-cd FolderLockApp.Service
-dotnet run
-```
-
-### Technology Stack
-- **.NET 8.0** - Framework
-- **WPF** - Desktop UI
-- **Entity Framework Core** - ORM
-- **SQLite** - Database
-- **Serilog** - Logging
-- **SharpShell** - Shell extension
-- **xUnit + FsCheck** - Testing
-
-## 🧪 Testing
-
-### Run Unit Tests
-```cmd
-dotnet test FolderLockApp.Core
-```
-
-### Test Coverage
-- Encryption engine tests
-- File system operation tests
-- Database operation tests
-- Property-based tests (FsCheck)
-- Integration tests
+---
 
 ## 📊 Performance
 
 Typical performance on modern hardware:
-- **Small files** (< 1MB): ~100 files/second
-- **Medium files** (1-10MB): ~10 files/second
-- **Large files** (> 100MB): ~50 MB/second
 
-Performance varies based on:
+| File Type | Speed |
+|-----------|-------|
+| Small files (< 1MB) | ~100 files/second |
+| Medium files (1-10MB) | ~10 files/second |
+| Large files (> 100MB) | ~50 MB/second |
+
+**Factors affecting performance:**
 - CPU speed
 - Storage type (SSD vs HDD)
-- File types
+- File count
+- Total size
 - System load
 
-## 🐛 Troubleshooting
+---
 
-### Common Issues
+## 🔒 Best Practices
 
-**"Administrator Privileges Required"**
-- Right-click and "Run as administrator"
+### Password Security
 
-**"Service Not Running"**
-```powershell
-Start-Service "FolderLockApp Encryption Service"
+✅ **DO:**
+- Use strong passwords (12+ characters)
+- Mix letters, numbers, symbols
+- Use unique passwords per folder
+- Store in password manager
+- Write down for critical files
+
+❌ **DON'T:**
+- Use simple passwords
+- Reuse passwords
+- Share passwords
+- Rely only on memory
+
+### File Management
+
+✅ **DO:**
+- Backup before locking
+- Test unlock immediately
+- Keep backups of encrypted folders
+- Document which folders are locked
+
+❌ **DON'T:**
+- Lock without backup
+- Forget to test unlock
+- Manually modify .locked files
+- Delete database without unlocking
+
+### Usage Tips
+
+1. **Start Small:** Test with non-critical files first
+2. **Verify Password:** Unlock immediately after locking
+3. **Regular Backups:** Backup encrypted folders regularly
+4. **Document Passwords:** Keep secure password records
+5. **Monitor Logs:** Check logs for errors
+
+---
+
+## 📝 How It Works
+
+### Locking Process
+
+1. User selects folder and enters password
+2. Application generates encryption key from password (PBKDF2)
+3. Each file is encrypted with AES-256
+4. Files renamed with `.locked` extension
+5. Folder registered in database
+6. Original files securely deleted
+
+### Unlocking Process
+
+1. User selects folder and enters password
+2. Application derives key from password
+3. Each `.locked` file is decrypted
+4. Original filenames restored
+5. Database updated
+6. Encrypted files deleted
+
+### File Structure
+
+**Before Locking:**
+```
+MyFolder/
+├── document.txt
+├── image.jpg
+└── data.xlsx
 ```
 
-**"Code Integrity Verification Failed"**
-- Normal for debug builds
-- For production, sign assemblies
-
-**Can't Unlock - Wrong Password**
-- Password cannot be recovered (by design)
-- Restore from backup if available
-
-For detailed troubleshooting, see **[USER_GUIDE.md](USER_GUIDE.md#troubleshooting)**
-
-## 📝 Logging
-
-### Log Locations
-- **Service Logs**: `%ProgramData%\FolderLockApp\Logs\service-*.log`
-- **Security Logs**: `%ProgramData%\FolderLockApp\Logs\security-*.log`
-- **Windows Event Log**: Application log, source "FolderLockApp Service"
-
-### View Logs
-```powershell
-# View service logs
-Get-Content "$env:ProgramData\FolderLockApp\Logs\service-*.log" -Tail 50
-
-# View security logs
-Get-Content "$env:ProgramData\FolderLockApp\Logs\security-*.log" -Tail 50
-
-# View Windows Event Log
-Get-EventLog -LogName Application -Source "FolderLockApp Service" -Newest 20
+**After Locking:**
+```
+MyFolder/
+├── document.txt.locked
+├── image.jpg.locked
+└── data.xlsx.locked
 ```
 
-## 🔄 Updates and Maintenance
+---
+
+## 🔄 Updates & Maintenance
 
 ### Updating the Application
-1. Stop the service
-2. Backup the database
-3. Replace executables
-4. Restart the service
+
+1. Unlock all folders
+2. Close the application
+3. Replace executable with new version
+4. Run new version
+5. Re-lock folders if needed
 
 ### Database Backup
+
 ```powershell
+# Backup database
 Copy-Item "$env:ProgramData\FolderLockApp\folderlock.db" `
           "$env:ProgramData\FolderLockApp\folderlock.db.backup"
 ```
 
-### Maintenance Tasks
-- **Weekly**: Check service status
-- **Monthly**: Review logs, backup database
-- **Quarterly**: Full backup, test restore
+### Viewing Logs
 
-## 🗑️ Uninstallation
-
-### Important: Unlock All Folders First!
-Before uninstalling, unlock all folders or you'll lose access to encrypted files.
-
-### Uninstall Steps
 ```powershell
-# 1. Stop and remove service
-sc.exe stop "FolderLockApp Encryption Service"
-sc.exe delete "FolderLockApp Encryption Service"
-
-# 2. Unregister shell extension
-cd path\to\FolderLockApp.ShellExtension
-FolderLockApp.ShellExtension.exe unregister
-
-# 3. Delete application files
-# 4. Delete data folder (optional)
-Remove-Item "$env:ProgramData\FolderLockApp" -Recurse
+# View recent logs
+Get-Content "$env:ProgramData\FolderLockApp\Logs\allinone-*.log" -Tail 50
 ```
-
-## ⚠️ Important Warnings
-
-🚨 **Password Recovery**: If you forget your password, files CANNOT be recovered. This is by design for security.
-
-🚨 **Backup First**: Always backup important data before locking for the first time.
-
-🚨 **Test Unlock**: After locking, immediately test unlocking to verify password works.
-
-🚨 **Service Dependency**: Keep the background service running for auto-lock features.
-
-🚨 **Admin Rights**: Always run with administrator privileges.
-
-## 📄 License
-
-[Specify your license here]
-
-## 🤝 Contributing
-
-[Specify contribution guidelines here]
-
-## 📞 Support
-
-For issues, questions, or feature requests:
-1. Check the documentation
-2. Review log files
-3. Search existing issues
-4. Create a new issue with details
-
-## 🙏 Acknowledgments
-
-- Built with .NET 8.0
-- Uses SharpShell for shell extension
-- Encryption powered by .NET Cryptography
-- Testing with xUnit and FsCheck
-
-## 📚 Additional Resources
-
-- **[Quick Start Guide](QUICK_START.md)** - Get started in 5 minutes
-- **[User Guide](USER_GUIDE.md)** - Complete usage documentation
-- **[How It Works](HOW_IT_WORKS.md)** - Technical architecture
-- **[Security Features](SECURITY_FEATURES.md)** - Security details
-- **[Admin Setup](ADMIN_SETUP_GUIDE.md)** - Installation guide
-- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Recent changes
 
 ---
 
-**FolderLock** - Secure your folders with confidence. 🔒
+## 🗑️ Uninstallation
 
-*Remember: With great encryption comes great responsibility. Always backup your data and remember your passwords!*
+### Before Uninstalling
+
+**⚠️ CRITICAL:** Unlock all folders first!
+
+1. Open FolderLock
+2. Unlock every folder in the list
+3. Verify files are accessible
+4. Close application
+
+### Uninstall Steps
+
+1. Delete `FolderLockApp.AllInOne.exe`
+2. Delete data folder (optional):
+   ```cmd
+   rmdir /s "%ProgramData%\FolderLockApp"
+   ```
+
+---
+
+## ❓ FAQ
+
+### Q: Is this really secure?
+
+**A:** Yes. AES-256 is military-grade encryption used by governments and banks. With a strong password, your files are extremely secure.
+
+### Q: Can I recover my password?
+
+**A:** No. This is by design. If password recovery existed, it would be a security vulnerability.
+
+### Q: Can I move encrypted folders?
+
+**A:** Yes. You can copy/move folders with `.locked` files. Unlock them with FolderLock on any computer.
+
+### Q: Does this work on network drives?
+
+**A:** Yes, but performance may be slower. Local drives recommended.
+
+### Q: Can I lock system folders?
+
+**A:** Not recommended. Only lock user data folders.
+
+### Q: What happens if I lose the database?
+
+**A:** You can still decrypt files if you remember the password, but you'll need to manually decrypt each file.
+
+### Q: Is this open source?
+
+**A:** Check the repository license for details.
+
+---
+
+## 📞 Support
+
+### Getting Help
+
+1. **Check this README** - Most questions answered here
+2. **Check logs** - `%ProgramData%\FolderLockApp\Logs\`
+3. **Windows Event Viewer** - Application log
+4. **Search error messages** - In this document
+
+### Reporting Issues
+
+When reporting issues, include:
+- Windows version
+- Error messages
+- Log file excerpts
+- Steps to reproduce
+
+---
+
+## ⚡ Quick Reference
+
+### Build
+```cmd
+build.bat
+```
+
+### Run
+```cmd
+Release\FolderLockApp.AllInOne.exe
+```
+
+### View Logs
+```cmd
+explorer %ProgramData%\FolderLockApp\Logs
+```
+
+### Backup Database
+```cmd
+copy "%ProgramData%\FolderLockApp\folderlock.db" backup.db
+```
+
+---
+
+## 📜 License
+
+[Specify your license here]
+
+---
+
+## 🎉 You're Ready!
+
+1. Run `build.bat`
+2. Run `Release\FolderLockApp.AllInOne.exe`
+3. Lock your first folder
+4. Remember your password!
+
+**🔒 Happy encrypting!**
+
+---
+
+**Version:** 1.0  
+**Last Updated:** 2024  
+**Platform:** Windows 10/11  
+**Framework:** .NET 8.0

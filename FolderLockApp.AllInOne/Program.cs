@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,6 +11,7 @@ using FolderLockApp.Core.Services;
 using FolderLockApp.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace FolderLockApp.AllInOne;
 
@@ -39,7 +41,7 @@ class Program
             // Verify code integrity
             if (!VerifyCodeIntegrity())
             {
-                MessageBox.Show(
+                System.Windows.MessageBox.Show(
                     "Code integrity verification failed!\n\n" +
                     "The application files may have been tampered with.\n" +
                     "Please reinstall from a trusted source.",
@@ -52,7 +54,7 @@ class Program
             // Check admin privileges
             if (!AdminPrivilegeHelper.IsRunningAsAdmin())
             {
-                var result = MessageBox.Show(
+                var result = System.Windows.MessageBox.Show(
                     "FolderLock requires administrator privileges.\n\n" +
                     "Would you like to restart with administrator privileges?",
                     "Administrator Privileges Required",
@@ -67,7 +69,7 @@ class Program
                     }
                     else
                     {
-                        MessageBox.Show(
+                        System.Windows.MessageBox.Show(
                             "Failed to restart with administrator privileges.\n\n" +
                             "Please right-click and select 'Run as administrator'.",
                             "Elevation Failed",
@@ -82,24 +84,15 @@ class Program
                 }
             }
 
-            // Check if running as service or GUI
-            if (args.Length > 0 && args[0] == "--service")
-            {
-                // Run as background service
-                await RunAsServiceAsync(args);
-            }
-            else
-            {
-                // Run as GUI application
-                RunAsGUI(args);
-            }
+            // Run as GUI application with embedded service
+            RunAsGUI(args);
 
             return 0;
         }
         catch (Exception ex)
         {
             Log.Fatal(ex, "Application terminated unexpectedly");
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"Fatal error:\n\n{ex.Message}",
                 "Error",
                 MessageBoxButton.OK,
@@ -139,11 +132,42 @@ class Program
         }
     }
 
-    private static async Task RunAsServiceAsync(string[] args)
+    private static void RunAsGUI(string[] args)
     {
-        Log.Information("Running in service mode");
+        Log.Information("Running in GUI mode");
 
-        var builder = Host.CreateApplicationBuilder(args);
+        // Start background service in separate thread
+        var serviceThread = new Thread(async () =>
+        {
+            try
+            {
+                await RunBackgroundServiceAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Background service error");
+            }
+        })
+        {
+            IsBackground = true,
+            Name = "BackgroundService"
+        };
+        
+        serviceThread.Start();
+
+        // Give service time to start
+        Thread.Sleep(2000);
+
+        // Start WPF application
+        var app = new App();
+        app.Run();
+    }
+
+    private static async Task RunBackgroundServiceAsync()
+    {
+        Log.Information("Starting background service");
+
+        var builder = Host.CreateApplicationBuilder();
         
         // Configure services
         var appDataPath = Path.Combine(
@@ -173,38 +197,6 @@ class Program
         }
         
         await host.RunAsync();
-    }
-
-    private static void RunAsGUI(string[] args)
-    {
-        Log.Information("Running in GUI mode");
-
-        // Start background service in separate thread
-        var serviceThread = new Thread(async () =>
-        {
-            try
-            {
-                await RunAsServiceAsync(new[] { "--service" });
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Background service error");
-            }
-        })
-        {
-            IsBackground = true,
-            Name = "BackgroundService"
-        };
-        
-        serviceThread.Start();
-
-        // Give service time to start
-        Thread.Sleep(2000);
-
-        // Start WPF application
-        var app = new App();
-        app.InitializeComponent();
-        app.Run();
     }
 }
 
@@ -256,7 +248,6 @@ public class BackgroundEncryptionService : BackgroundService
             var folderRegistry = scope.ServiceProvider.GetRequiredService<IFolderRegistry>();
             
             // Check for folders that need auto-locking
-            // Implementation depends on your FolderRegistry interface
             _logger.LogDebug("Checking auto-lock folders");
         }
         catch (Exception ex)
@@ -269,7 +260,7 @@ public class BackgroundEncryptionService : BackgroundService
 /// <summary>
 /// WPF Application class.
 /// </summary>
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private IHost? _host;
 
@@ -314,7 +305,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Startup failed:\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            System.Windows.MessageBox.Show($"Startup failed:\n\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
     }
